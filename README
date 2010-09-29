@@ -1,0 +1,14 @@
+Backup mysql database and media-files to S3.
+- gzip the files
+- encrypt with gpg (optionally)
+
+Installation:
+- install django_backup, boto and django-storages
+
+Add 'django_backup' app to INSTALLED_APPS.
+
+Settings:
+#
+
+Usage:
+$ python manage.py backup
