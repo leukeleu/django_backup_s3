@@ -115,13 +115,11 @@ class Command(NoArgsCommand):
         )
 
         #from django.core.files.storage import FileSystemStorage
-        #return FileSystemStorage("backup")
+        #return FileSystemStorage("backup_files")
 
     def gzip_upload_files(self, temp_dir):
-        if not hasattr(settings, 'BACKUP_FILE_PATHS'):
-            return ''
+        upload_paths = self.get_upload_paths()
 
-        upload_paths = settings.BACKUP_FILE_PATHS
         if not upload_paths:
             return ''
 
@@ -151,3 +149,12 @@ class Command(NoArgsCommand):
         if not os.path.exists(output_filename):
             raise Exception("File not found: %s" % output_filename)
         return output_filename
+
+    def get_upload_paths(self):
+        """
+        Return upload paths from setting. Filter existing paths.
+        """
+        if not hasattr(settings, 'BACKUP_FILE_PATHS'):
+            return []
+        else:
+            return [path for path in settings.BACKUP_FILE_PATHS if os.path.exists(path)]
