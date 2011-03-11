@@ -19,7 +19,7 @@ class Command(NoArgsCommand):
         try:
             self.backup()
         except Exception, e:
-            mail_managers('Backup failed', str(e), None)
+            mail_managers('Backup failed for %s' % settings.DATABASE_NAME, str(e), None)
             raise
 
     def backup(self):
