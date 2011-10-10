@@ -157,4 +157,6 @@ class Command(NoArgsCommand):
         if not hasattr(settings, 'BACKUP_FILE_PATHS'):
             return []
         else:
-            return [path for path in settings.BACKUP_FILE_PATHS if os.path.exists(path)]
+            return set(
+                path for path in settings.BACKUP_FILE_PATHS if os.path.exists(path)
+            )
