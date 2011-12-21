@@ -19,8 +19,11 @@ class Command(NoArgsCommand):
         try:
             self.backup()
         except Exception, e:
-            mail_managers('Backup failed for %s' % settings.DATABASE_NAME, str(e), None)
+            mail_managers('Backup failed for %s' % self.get_database_name(), str(e), None)
             raise
+
+    def get_database_name(self):
+        return settings.DATABASES['default']['NAME']
 
     def backup(self):
         # create temp dir
@@ -52,7 +55,7 @@ class Command(NoArgsCommand):
             self.store_file(upload_output_filename)
 
     def get_database_filename(self):
-        return "db-%s-%s.sql" % (settings.DATABASE_NAME, self.get_today_string())
+        return "db-%s-%s.sql" % (self.get_database_name(), self.get_today_string())
 
     def get_today_string(self):
         return str(datetime.date.today())
@@ -66,15 +69,16 @@ class Command(NoArgsCommand):
         return temp_dir
 
     def mysql_backup(self, output_file):
-        if settings.DATABASE_ENGINE != 'mysql':
+        if settings.DATABASES['default']['ENGINE'] != 'django.db.backends.mysql':
             raise Exception("Only mysql is supported for backup")
 
+        database_name = self.get_database_name()
         command_string = 'mysqldump --user=%s --password=%s %s > %s' % (
-            settings.DATABASE_USER, settings.DATABASE_PASSWORD, settings.DATABASE_NAME, output_file
+            settings.DATABASES['default']['USER'], settings.DATABASES['default']['PASSWORD'], database_name, output_file
         )
         status = os.system(command_string)
         if status != 0:
-            raise Exception("Mysqldump failed for database %s" % settings.DATABASE_NAME)
+            raise Exception("Mysqldump failed for database %s" % database_name)
 
         if not os.path.exists(output_file):
             raise Exception("Database backup file not created: %s" % output_file)
@@ -114,6 +118,8 @@ class Command(NoArgsCommand):
             acl='private'
         )
 
+        # Code fragment for local testing
+        # todo: make setting
         #from django.core.files.storage import FileSystemStorage
         #return FileSystemStorage("backup_files")
 
@@ -125,7 +131,7 @@ class Command(NoArgsCommand):
 
         target_file = os.path.join(
             temp_dir,
-            "uploads-%s-%s.tar.gz" % (settings.DATABASE_NAME, self.get_today_string())
+            "uploads-%s-%s.tar.gz" % (self.get_database_name(), self.get_today_string())
         )
 
         command_string = "tar -czf %s --exclude-vcs --absolute-names %s" % (
