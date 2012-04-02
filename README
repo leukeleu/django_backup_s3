@@ -3,10 +3,10 @@ Backup mysql database and media-files to S3.
 - encrypt with gpg (optional)
 
 Installation:
-- install django_backup
+- install django_backup_s3
 - required: pip install boto django-storages
 
-Add 'django_backup' app to INSTALLED_APPS.
+Add 'django_backup_s3' app to INSTALLED_APPS.
 
 Settings:
 BACKUP_S3_BUCKET (required)
